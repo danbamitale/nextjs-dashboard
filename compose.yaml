@@ -1,0 +1,49 @@
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: nextjs-dashboard
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_store:/var/lib/postgresql/data/pgdata
+    ports:
+      - '10864:5432'
+    networks:
+      - nextjs-dashboard
+  
+  pg_proxy:
+    image: ghcr.io/neondatabase/wsproxy:latest
+    environment:
+      APPEND_PORT: "postgres:5432"
+      ALLOW_ADDR_REGEX: ".*"
+      LOG_TRAFFIC: "true"
+    ports:
+      - "5433:80"
+    depends_on:
+      - postgres
+    
+
+
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 18080:8080
+    networks:
+      - nextjs-dashboard
+
+
+
+
+networks:
+  nextjs-dashboard:
+
+
+
+volumes:
+  postgres_store:
