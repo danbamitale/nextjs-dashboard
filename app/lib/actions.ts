@@ -3,6 +3,8 @@ import { z } from "zod";
 import { sql } from "@vercel/postgres";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { signIn, signOut } from '@/auth'
+import { AuthError } from "next-auth";
 
 export type State = {
   errors?: {
@@ -113,3 +115,25 @@ export const deleteInvoice = async (id: string) => {
 
   redirect("/dashboard/invoices");
 };
+
+export const authenticate = async (prevState: string | undefined, formData: FormData) => {
+  try {
+    await signIn('credentials', formData)
+  } catch (e) {
+    console.log(e)
+      if (e instanceof AuthError) {
+        switch (e.type) {
+          case 'CredentialsSignin':
+            return 'Invalid credentials.'
+          default: 
+            return 'Something went wrong.'
+        }
+      }
+
+      throw e
+  }
+}
+
+export const signOutUserSession = async () => {
+   await signOut()
+}
